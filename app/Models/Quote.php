@@ -4,8 +4,8 @@ namespace App\Models;
 
 use App\Services\AI\GeminiService;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property int $id
@@ -35,12 +35,12 @@ class Quote extends Model
 
     private function calculateTotalRevenue(): float
     {
-        return $this->lineItems->sum(fn($item) => $item->sell_price * $item->quantity);
+        return $this->lineItems->sum(fn ($item) => $item->sell_price * $item->quantity);
     }
 
     private function calculateTotalCost(): float
     {
-        return $this->lineItems->sum(fn($item) => $item->cost_price * $item->quantity);
+        return $this->lineItems->sum(fn ($item) => $item->cost_price * $item->quantity);
     }
 
     private function calculateLaborCost(): float
@@ -50,8 +50,6 @@ class Quote extends Model
 
     /**
      * Calculate profitability metrics for the quote.
-     *
-     * @return array
      */
     public function calculateProfitability(): array
     {
@@ -92,7 +90,7 @@ class Quote extends Model
         $formattedData = json_encode($quoteProfitability, JSON_PRETTY_PRINT);
         $prompt = $this->buildPrompt($formattedData);
 
-        $gemini = new GeminiService();
+        $gemini = new GeminiService;
         $response = $gemini->generateContent($prompt);
 
         return $response ?? 'No suggestions available.';

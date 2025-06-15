@@ -53,7 +53,7 @@ class LineItem extends Model
             'cost_price' => $this->cost_price,
             'quantity' => $this->quantity,
             'margin_percent' => $marginPercent,
-            'is_low_margin' => $isLowMargin
+            'is_low_margin' => $isLowMargin,
         ];
     }
 }

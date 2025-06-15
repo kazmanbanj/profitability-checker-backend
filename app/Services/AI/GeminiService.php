@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Http;
 class GeminiService
 {
     protected string $baseUrl;
+
     protected string $apiKey;
+
     protected string $role;
 
     public function __construct()
@@ -26,10 +28,10 @@ class GeminiService
                 [
                     'role' => $this->role,
                     'parts' => [
-                        ['text' => $prompt]
-                    ]
-                ]
-            ]
+                        ['text' => $prompt],
+                    ],
+                ],
+            ],
         ]);
 
         $data = $response->json();

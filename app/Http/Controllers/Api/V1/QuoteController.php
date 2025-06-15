@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Models\Quote;
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Helpers\ApiResponse;
-use Illuminate\Http\Request;
-use App\Services\QuoteService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreQuoteRequest;
+use App\Models\Quote;
+use App\Services\QuoteService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 
 class QuoteController extends Controller
 {
