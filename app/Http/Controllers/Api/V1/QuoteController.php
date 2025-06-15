@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Quote;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Helpers\ApiResponse;
 use Illuminate\Http\Request;
 use App\Services\QuoteService;
@@ -11,9 +12,11 @@ use App\Http\Requests\StoreQuoteRequest;
 
 class QuoteController extends Controller
 {
-    public function index(Request $request, QuoteService $quoteService)
+    public function __construct(protected QuoteService $quoteService) {}
+
+    public function index(Request $request)
     {
-        $response = $quoteService->list($request);
+        $response = $this->quoteService->list($request);
 
         return (new ApiResponse(
             data: $response,
@@ -21,13 +24,33 @@ class QuoteController extends Controller
         ))->asSuccessful();
     }
 
-    public function analyze(StoreQuoteRequest $request, QuoteService $quoteService)
+    public function show(Quote $quote)
     {
-        $response = $quoteService->analyze($request->validated());
+        $quote = $quote->load('lineItems')->toArray();
+
+        return (new ApiResponse(
+            data: $quote,
+            message: __('Quote retrieved successfully')
+        ))->asSuccessful();
+    }
+
+    public function analyze(StoreQuoteRequest $request)
+    {
+        $response = $this->quoteService->analyze($request->validated());
 
         return (new ApiResponse(
             data: $response,
-            message: __('Quote created successfully')
-        ))->asCreated();
+            message: __('Quote analyzed successfully')
+        ))->asSuccessful();
+    }
+
+    public function exportAnalysis(Quote $quote)
+    {
+        $pdfTitle = 'Quote Analysis';
+        $companyName = 'AV dealers';
+        $analysis = $quote->calculateProfitability();
+        $pdf = PDF::loadView('pdf-exports.quote-summary', compact('pdfTitle', 'companyName', 'analysis'));
+
+        return $pdf->download('quote-analysis.pdf');
     }
 }

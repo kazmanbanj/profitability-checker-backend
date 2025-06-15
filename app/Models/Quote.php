@@ -71,6 +71,10 @@ class Quote extends Model
 
         return [
             'health_status' => $health,
+            'labor_hours' => $this->labor_hours,
+            'labor_cost_per_hour' => $this->labor_cost_per_hour,
+            'fixed_overheads' => $this->fixed_overheads,
+            'target_profit_margin' => $this->target_profit_margin,
             'total_cost' => $totalCost,
             'cost_of_goods_sold' => $costOfGoodsSold,
             'total_revenue' => $totalRevenue,
@@ -78,7 +82,8 @@ class Quote extends Model
             'gross_profit' => $grossProfit,
             'profit_margin' => round($profitMargin, 2),
             'meets_target' => $profitMargin >= $this->target_profit_margin,
-            'low_margin_items' => $lowMarginItems,
+            'line_items' => $lowMarginItems,
+            'currency_symbol' => '$',
         ];
     }
 
