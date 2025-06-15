@@ -1,11 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\QuoteController;
-use App\Http\Controllers\Api\AnalysisController;
+use App\Http\Controllers\Api\V1\QuoteController;
+use App\Http\Controllers\Api\V1\AnalysisController;
 
 Route::prefix('v1')->group(function () {
     Route::apiResource('quotes', QuoteController::class);
-    Route::post('quotes/{quote}/analyze', [AnalysisController::class, 'analyze']);
-    Route::post('quotes/{quote}/ai-suggestions', [AnalysisController::class, 'generateSuggestions']);
+    Route::post('quotes/analyze', [QuoteController::class, 'analyze']);
 });
