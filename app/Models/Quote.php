@@ -81,7 +81,7 @@ class Quote extends Model
             'profit_margin' => round($profitMargin, 2),
             'meets_target' => $profitMargin >= $this->target_profit_margin,
             'line_items' => $lowMarginItems,
-            'currency_symbol' => '$',
+            'currency_symbol' => '$', // This currency is assumed, it is meant to be derived from the user input.
         ];
     }
 
