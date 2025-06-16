@@ -64,7 +64,6 @@
                 <th>Total Cost</th>
                 <th>Total Revenue</th>
                 <th>Margin %</th>
-                <th>Low Margin</th>
             </tr>
         </thead>
         <tbody>
@@ -81,13 +80,6 @@
                     <td>{{ $analysis['currency_symbol'] }}{{ number_format($totalCost, 2) }}</td>
                     <td>{{ $analysis['currency_symbol'] }}{{ number_format($totalRevenue, 2) }}</td>
                     <td>{{ $item['margin_percent'] }}%</td>
-                    <td>
-                        @if($item['is_low_margin'])
-                            <span class="text-danger fw-bold">Yes</span>
-                        @else
-                            No
-                        @endif
-                    </td>
                 </tr>
             @endforeach
         </tbody>
@@ -99,7 +91,6 @@
                 <td></td>
                 <td><strong>{{ $analysis['currency_symbol'] }}{{ number_format($analysis['total_cost'], 2) }}</strong></td>
                 <td><strong>{{ $analysis['currency_symbol'] }}{{ number_format($analysis['total_revenue'], 2) }}</strong></td>
-                <td></td>
                 <td></td>
             </tr>
         </tfoot>

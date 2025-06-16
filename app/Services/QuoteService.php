@@ -23,11 +23,7 @@ class QuoteService
         foreach ($request['line_items'] as $item) {
             $quote->lineItems()->create($item);
         }
-        $quoteProfitability = $quote->calculateProfitability();
-        $aiGeneratedProfitabilitySuggestions = $quote->getAIGeneratedProfitabilitySuggestions($quoteProfitability);
 
-        return array_merge($quoteProfitability, [
-            'ai_suggestions' => $aiGeneratedProfitabilitySuggestions,
-        ]);
+        return $quote->calculateProfitability();
     }
 }

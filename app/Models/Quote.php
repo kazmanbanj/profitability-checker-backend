@@ -48,27 +48,19 @@ class Quote extends Model
         return $this->labor_hours * $this->labor_cost_per_hour;
     }
 
-    /**
-     * Calculate profitability metrics for the quote.
-     */
     public function calculateProfitability(): array
     {
         $totalRevenue = $this->calculateTotalRevenue();
         $totalCost = $this->calculateTotalCost();
         $laborCost = $this->calculateLaborCost();
         $costOfGoodsSold = $totalCost + $laborCost + $this->fixed_overheads;
-
         $grossProfit = $totalRevenue - $costOfGoodsSold;
         $profitMargin = $totalRevenue > 0 ? ($grossProfit / $totalRevenue) * 100 : 0;
-        $health = $profitMargin >= $this->target_profit_margin ? 'green' : ($profitMargin >= 0.1 ? 'amber' : 'red');
-        $lowMarginItems = [];
 
-        foreach ($this->lineItems as $item) {
-            $lowMarginItems[] = $item->getProfitabilityMetrics($this->target_profit_margin);
-        }
-
-        return [
-            'health_status' => $health,
+        $lineItems = $this->lineItems->map(function ($item) {
+            return $item->getProfitabilityMetrics();
+        })->all();
+        $profitability = [
             'labor_hours' => $this->labor_hours,
             'labor_cost_per_hour' => $this->labor_cost_per_hour,
             'fixed_overheads' => $this->fixed_overheads,
@@ -80,36 +72,67 @@ class Quote extends Model
             'gross_profit' => $grossProfit,
             'profit_margin' => round($profitMargin, 2),
             'meets_target' => $profitMargin >= $this->target_profit_margin,
-            'line_items' => $lowMarginItems,
-            'currency_symbol' => '$', // This currency is assumed, it is meant to be derived from the user input.
+            'currency_symbol' => '$', // Assumed currency; should be user-defined.
+            'line_items' => $lineItems,
         ];
+
+        $aiGenerated = extractJsonArray($this->getAIGeneratedProfitability($profitability));
+        $resultMap = collect($aiGenerated['items'] ?? [])->keyBy('name');
+        $profitability['line_items'] = collect($profitability['line_items'])->map(function ($item) use ($resultMap) {
+            $aiItem = $resultMap->get($item['name'], []);
+
+            return array_merge($item, $aiItem);
+        })->all();
+
+        return array_merge($profitability, [
+            'labor_suggestions' => $aiGenerated['labor'] ?? [],
+            'ai_suggestions' => $aiGenerated['suggestions'] ?? [],
+        ]);
     }
 
-    public function getAIGeneratedProfitabilitySuggestions(array $quoteProfitability): string
+    public function getAIGeneratedProfitability(array $quoteProfitability): string
     {
-        $formattedData = json_encode($quoteProfitability, JSON_PRETTY_PRINT);
-        $prompt = $this->buildPrompt($formattedData);
-
-        $gemini = new GeminiService;
+        $prompt = $this->buildPrompt($quoteProfitability);
+        $gemini = app(GeminiService::class);
         $response = $gemini->generateContent($prompt);
 
-        return $response ?? 'No suggestions available.';
+        return $response ?: 'No suggestions available.';
     }
 
-    private function buildPrompt(string $profitabilityData): string
+    private function buildPrompt(array $profitabilityData): string
     {
-        return <<<EOT
-            As a business analyst. Analyze the following quote data and provide actionable recommendations to improve profitability:
+        $profitabilityJson = json_encode($profitabilityData, JSON_PRETTY_PRINT);
 
-            $profitabilityData
+        return <<<PROMPT
+            You are a business analyst. Analyze the following quote data and provide recommendations to improve profitability:
+            $profitabilityJson
+            Respond with a JSON object containing three top-level keys: "suggestions", "items" and "labor".
 
-            Please include the following:
-            - Adjustments to meet target margins
-            - Labor or resource allocation improvements
-            - Suggested product swaps (if any)
-            - A summary of the proposal's profitability health written in client-friendly language
+            "suggestions": {
+                "target_margin_adjustments": (suggested adjustments to meet target margins),
+                "labor_allocation_improvements": (labor or resource allocation improvements),
+                "product_swaps": (suggested product swaps, if any),
+                "profitability_summary": (summary of the proposal's profitability health in client-friendly language),
+                "profitability_health_indicator": ("green", "amber", or "red")
+            }
 
-            Respond clearly and concisely. Bullet points are welcome.
-            EOT;
+            "items": [
+            {
+                "name": (item name),
+                "status": ("Acceptable Margin" or "Low Margin"),
+                "suggestion": (if margin is low)
+            },
+            ...
+            ]
+
+            Based on the provided estimated labor hours, assess whether the labor estimate is sustainable.
+            "labor": {
+                "estimated_sustainable_hours": your estimation
+                "labor_hours_exceeded": true or false depending on whether the user's estimate exceeds your estimate by a large margin (e.g., > 20%)
+                "comment": explanation of your judgment in client-friendly terms
+            }
+
+            Respond only with the JSON object.
+            PROMPT;
     }
 }

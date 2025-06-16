@@ -35,25 +35,22 @@ class LineItem extends Model
         return $this->belongsTo(Quote::class);
     }
 
-    public function getProfitabilityMetrics(?float $thresholdPercent = null): array
+    public function getProfitabilityMetrics(): array
     {
-        $cost = $this->cost_price * $this->quantity;
-        $revenue = $this->sell_price * $this->quantity;
+        $cost = (float) $this->cost_price * (int) $this->quantity;
+        $revenue = (float) $this->sell_price * (int) $this->quantity;
 
-        $margin = $revenue > 0
-            ? ($revenue - $cost) / $revenue
-            : 0;
-
-        $marginPercent = round($margin * 100, 2);
-        $isLowMargin = $thresholdPercent ? $marginPercent < $thresholdPercent : null;
+        $marginPercent = 0.0;
+        if ($revenue > 0) {
+            $marginPercent = round((($revenue - $cost) / $revenue) * 100, 2);
+        }
 
         return [
             'name' => $this->name,
-            'sell_price' => $this->sell_price,
-            'cost_price' => $this->cost_price,
-            'quantity' => $this->quantity,
+            'sell_price' => (float) $this->sell_price,
+            'cost_price' => (float) $this->cost_price,
+            'quantity' => (int) $this->quantity,
             'margin_percent' => $marginPercent,
-            'is_low_margin' => $isLowMargin,
         ];
     }
 }
