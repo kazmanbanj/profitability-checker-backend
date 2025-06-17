@@ -94,7 +94,7 @@
     }
 
     .quote-items-table {
-        font-size: 12px;
+        font-size: 10px;
     }
     .quote-items-table th,
     .quote-items-table td {
@@ -103,7 +103,7 @@
 </style>
 
 <div class="container">
-    <h2 class="mb-4">{{ $companyName }} Quote Summary</h2>
+    <h2 class="mb-4">Quote Summary</h2>
 
     <h4>Quote Items Overview</h4>
     <table style="width: 100%;" class="table table-sm table-bordered quote-items-table">
