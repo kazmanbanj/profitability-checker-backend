@@ -47,8 +47,8 @@ class QuoteController extends Controller
     public function exportAnalysis(Quote $quote)
     {
         $pdfTitle = 'Quote Analysis';
-        $companyName = 'AV dealers'; // This company name is assumed, it is meant to be derived from the user input.
-        $analysis = $quote->calculateProfitability();
+        $companyName = 'AV dealers'; // Assumed company name; should be user-defined.
+        $analysis = $quote->ai_profitability_suggestions ?? $quote->calculateProfitability();
         $pdf = PDF::loadView('pdf-exports.quote-summary', compact('pdfTitle', 'companyName', 'analysis'));
 
         return $pdf->download('quote-analysis.pdf');

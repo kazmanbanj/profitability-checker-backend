@@ -17,6 +17,7 @@ return new class extends Migration
             $table->decimal('labor_cost_per_hour', 8, 2);
             $table->decimal('fixed_overheads', 13, 2);
             $table->decimal('target_profit_margin', 5, 2);
+            $table->json('ai_profitability_suggestions')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

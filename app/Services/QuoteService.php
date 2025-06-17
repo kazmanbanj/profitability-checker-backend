@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Quote;
+use Illuminate\Support\Facades\DB;
 
 class QuoteService
 {
@@ -19,11 +20,18 @@ class QuoteService
 
     public function analyze(array $request): array
     {
-        $quote = Quote::create($request);
-        foreach ($request['line_items'] as $item) {
-            $quote->lineItems()->create($item);
-        }
+        return DB::transaction(function () use ($request) {
+            $quote = Quote::create($request);
 
-        return $quote->calculateProfitability();
+            if (! empty($request['line_items']) && is_array($request['line_items'])) {
+                $quote->lineItems()->createMany($request['line_items']);
+            }
+
+            $quote->update([
+                'ai_profitability_suggestions' => $quote->calculateProfitability(),
+            ]);
+
+            return $quote->toArray();
+        });
     }
 }

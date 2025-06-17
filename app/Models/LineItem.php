@@ -50,6 +50,7 @@ class LineItem extends Model
             'sell_price' => (float) $this->sell_price,
             'cost_price' => (float) $this->cost_price,
             'quantity' => (int) $this->quantity,
+            'additional_info' => $this->additional_info,
             'margin_percent' => $marginPercent,
         ];
     }
