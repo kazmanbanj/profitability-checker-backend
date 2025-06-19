@@ -11,7 +11,6 @@ This is the backend API for the Specifi Profit Optimiser project, built with **L
 - **Database:** MySQL
 - **AI Integration:** Google Gemini API
 - **PDF Export:** barryvdh/laravel-dompdf
-- **Version Tracking:** Manual versioning via quote duplication
 
 ---
 
