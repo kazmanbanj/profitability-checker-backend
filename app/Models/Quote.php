@@ -166,7 +166,7 @@ class Quote extends Model
         $quoteJson = json_encode($previousSuggestion, JSON_PRETTY_PRINT);
 
         $lineItemInstructions = '';
-        if (!empty($userFeedback['line_items'])) {
+        if (! empty($userFeedback['line_items'])) {
             $lineItemInstructions = "The user has made specific suggestions for individual quote items as follows:\n";
             foreach ($userFeedback['line_items'] as $item) {
                 $lineItemInstructions .= "- Line Item ID {$item['id']}: \"{$item['suggestion']}\"\n";
@@ -174,14 +174,14 @@ class Quote extends Model
         }
 
         $laborInstruction = '';
-        if (!empty($userFeedback['labor_suggestions']['comment'])) {
+        if (! empty($userFeedback['labor_suggestions']['comment'])) {
             $laborInstruction = "Labor Feedback:\n- \"{$userFeedback['labor_suggestions']['comment']}\"\n";
         }
 
         $aiSuggestions = $userFeedback['ai_suggestions'] ?? [];
         $suggestionInstructions = '';
         foreach (['target_margin_adjustments', 'labor_allocation_improvements', 'product_swaps', 'profitability_summary'] as $key) {
-            if (!empty($aiSuggestions[$key])) {
+            if (! empty($aiSuggestions[$key])) {
                 $label = ucwords(str_replace('_', ' ', $key));
                 $suggestionInstructions .= "- $label: \"{$aiSuggestions[$key]}\"\n";
             }

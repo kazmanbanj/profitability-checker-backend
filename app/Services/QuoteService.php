@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Exceptions\ApiNotFoundException;
 use App\Models\Quote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Exceptions\ApiNotFoundException;
 
 class QuoteService
 {
