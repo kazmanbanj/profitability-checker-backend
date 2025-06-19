@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property float $labor_cost_per_hour
  * @property float $fixed_overheads
  * @property float $target_profit_margin
- * @property string $ai_profitability_suggestions
+ * @property json $ai_profitability_suggestions
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
@@ -49,6 +49,11 @@ class Quote extends Model
         return $this->hasMany(LineItem::class);
     }
 
+    public function aiAnalysisVersions(): HasMany
+    {
+        return $this->hasMany(QuoteAiAnalysisVersion::class);
+    }
+
     private function calculateTotalRevenue(): float
     {
         return $this->lineItems->sum(fn ($item) => $item->sell_price * $item->quantity);
@@ -64,7 +69,7 @@ class Quote extends Model
         return $this->labor_hours * $this->labor_cost_per_hour;
     }
 
-    public function calculateProfitability(): array
+    public function calculateProfitability(array $previousSuggestion = [], array $userFeedback = [], bool $reassess = false): array
     {
         $totalRevenue = $this->calculateTotalRevenue();
         $totalCost = $this->calculateTotalCost();
@@ -92,7 +97,9 @@ class Quote extends Model
             'line_items' => $lineItems,
         ];
 
-        $aiGenerated = extractJsonArray($this->getAIGeneratedProfitability($profitability));
+        $aiGenerated = $reassess
+            ? extractJsonArray($this->getAIGeneratedProfitability($previousSuggestion, $userFeedback, $reassess))
+            : extractJsonArray($this->getAIGeneratedProfitability($profitability));
         $resultMap = collect($aiGenerated['items'] ?? [])->keyBy('name');
         $profitability['line_items'] = collect($profitability['line_items'])->map(function ($item) use ($resultMap) {
             $aiItem = $resultMap->get($item['name'], []);
@@ -106,9 +113,11 @@ class Quote extends Model
         ]);
     }
 
-    public function getAIGeneratedProfitability(array $quoteProfitability): string
+    public function getAIGeneratedProfitability(array $quoteProfitability, array $userFeedback = [], bool $reassess = false): string
     {
-        $prompt = $this->buildPrompt($quoteProfitability);
+        $prompt = $reassess
+            ? $this->buildRePromptWithUserFeedback($quoteProfitability, $userFeedback)
+            : $this->buildPrompt($quoteProfitability);
         $gemini = app(GeminiService::class);
         $response = $gemini->generateContent($prompt);
 
@@ -150,5 +159,72 @@ class Quote extends Model
 
             Respond only with the JSON object.
             PROMPT;
+    }
+
+    public function buildRePromptWithUserFeedback(array $previousSuggestion, array $userFeedback): string
+    {
+        $quoteJson = json_encode($previousSuggestion, JSON_PRETTY_PRINT);
+
+        $lineItemInstructions = '';
+        if (!empty($userFeedback['line_items'])) {
+            $lineItemInstructions = "The user has made specific suggestions for individual quote items as follows:\n";
+            foreach ($userFeedback['line_items'] as $item) {
+                $lineItemInstructions .= "- Line Item ID {$item['id']}: \"{$item['suggestion']}\"\n";
+            }
+        }
+
+        $laborInstruction = '';
+        if (!empty($userFeedback['labor_suggestions']['comment'])) {
+            $laborInstruction = "Labor Feedback:\n- \"{$userFeedback['labor_suggestions']['comment']}\"\n";
+        }
+
+        $aiSuggestions = $userFeedback['ai_suggestions'] ?? [];
+        $suggestionInstructions = '';
+        foreach (['target_margin_adjustments', 'labor_allocation_improvements', 'product_swaps', 'profitability_summary'] as $key) {
+            if (!empty($aiSuggestions[$key])) {
+                $label = ucwords(str_replace('_', ' ', $key));
+                $suggestionInstructions .= "- $label: \"{$aiSuggestions[$key]}\"\n";
+            }
+        }
+
+        return <<<PROMPT
+            You are a business analyst reviewing your previous AI-generated profitability suggestions based on the original quote data below.
+
+            Original Quote Data:
+            $quoteJson
+
+            The user has submitted new feedback. Please update your original recommendations accordingly:
+
+            $lineItemInstructions
+            $laborInstruction
+            Additional Suggestions:
+            $suggestionInstructions
+
+            Respond in the same structured JSON format used previously:
+            {
+                "suggestions": {
+                    "target_margin_adjustments": (suggest new adjustment if there is a difference from previous suggestions),
+                    "labor_allocation_improvements": (suggest new adjustment if there is a difference from previous suggestions),
+                    "product_swaps": (suggest new adjustment if there is a difference from previous suggestions),
+                    "profitability_summary": (suggest new adjustment if there is a difference from previous suggestions),
+                    "profitability_health_indicator": ("green" for good, "amber" for needs review, or "red" for poor) – based on the updated profitability assessment
+                },
+
+                "items": [
+                {
+                    "name": (item name),
+                    "status": ("Acceptable Margin" or "Low Margin"),
+                    "suggestion": (suggest new adjustment if there is a difference from previous suggestions)
+                },
+                ...
+                ],
+
+                "labor": {
+                    "estimated_sustainable_hours": (suggest new adjustment if there is a difference from previous suggestions),
+                    "labor_hours_exceeded": true or false depending on if there is a difference from previous suggestions,
+                    "comment": (suggest new comment if there is a difference from previous suggestions)
+                }
+            }
+        PROMPT;
     }
 }

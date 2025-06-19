@@ -46,6 +46,7 @@ class LineItem extends Model
         }
 
         return [
+            'id' => $this->id,
             'name' => $this->name,
             'sell_price' => (float) $this->sell_price,
             'cost_price' => (float) $this->cost_price,

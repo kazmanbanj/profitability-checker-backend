@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-class StoreQuoteRequest extends BaseFormRequest
+class AnalyzeQuoteRequest extends BaseFormRequest
 {
     /**
      * Get the validation rules that apply to the request.

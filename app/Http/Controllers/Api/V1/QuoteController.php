@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreQuoteRequest;
+use App\Http\Requests\AnalyzeQuoteRequest;
+use App\Http\Requests\ReAnalyzeQuoteRequest;
 use App\Models\Quote;
 use App\Services\QuoteService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -26,7 +27,7 @@ class QuoteController extends Controller
 
     public function show(Quote $quote)
     {
-        $quote = $quote->load('lineItems')->toArray();
+        $quote = $this->quoteService->show($quote);
 
         return (new ApiResponse(
             data: $quote,
@@ -34,13 +35,33 @@ class QuoteController extends Controller
         ))->asSuccessful();
     }
 
-    public function analyze(StoreQuoteRequest $request)
+    public function analyze(AnalyzeQuoteRequest $request)
     {
         $response = $this->quoteService->analyze($request->validated());
 
         return (new ApiResponse(
             data: $response,
             message: __('Quote analyzed successfully')
+        ))->asSuccessful();
+    }
+
+    public function reAnalyze(Quote $quote, ReAnalyzeQuoteRequest $request)
+    {
+        $response = $this->quoteService->reAnalyze($quote, $request->validated());
+
+        return (new ApiResponse(
+            data: $response,
+            message: __('Quote re-analyzed successfully')
+        ))->asSuccessful();
+    }
+
+    public function versions(Quote $quote, Request $request)
+    {
+        $response = $this->quoteService->versions($quote, $request);
+
+        return (new ApiResponse(
+            data: $response,
+            message: __('Quote suggestion versions retrieved successfully')
         ))->asSuccessful();
     }
 

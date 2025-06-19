@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Quote;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Exceptions\ApiNotFoundException;
 
 class QuoteService
 {
@@ -18,6 +20,15 @@ class QuoteService
             : $query->get()->toArray();
     }
 
+    public function show(Quote $quote): array
+    {
+        if (! $quote) {
+            throw new ApiNotFoundException(__('Quote not found'));
+        }
+
+        return $quote->load('lineItems')->toArray();
+    }
+
     public function analyze(array $request): array
     {
         return DB::transaction(function () use ($request) {
@@ -26,12 +37,52 @@ class QuoteService
             if (! empty($request['line_items']) && is_array($request['line_items'])) {
                 $quote->lineItems()->createMany($request['line_items']);
             }
-
+            $suggestions = $quote->calculateProfitability();
+            $quote->aiAnalysisVersions()->create([
+                'suggestions' => $suggestions,
+            ]);
             $quote->update([
-                'ai_profitability_suggestions' => $quote->calculateProfitability(),
+                'ai_profitability_suggestions' => $suggestions,
             ]);
 
             return $quote->toArray();
         });
+    }
+
+    public function reAnalyze(Quote $quote, array $request): array
+    {
+        return DB::transaction(function () use ($quote, $request) {
+            $currentSuggestions = $quote->ai_profitability_suggestions;
+
+            if (is_string($currentSuggestions)) {
+                $currentSuggestions = json_decode($currentSuggestions, true);
+            }
+
+            $suggestions = $quote->calculateProfitability(
+                (array) $currentSuggestions,
+                $request,
+                true
+            );
+
+            $quote->aiAnalysisVersions()->create([
+                'suggestions' => $suggestions,
+            ]);
+            $quote->update([
+                'ai_profitability_suggestions' => $suggestions,
+            ]);
+
+            return $quote->toArray();
+        });
+    }
+
+    public function versions(Quote $quote, Request $request): array
+    {
+        $paginated = $request->get('paginated', true);
+        $limit = $request->get('limit', 10);
+        $query = $quote->aiAnalysisVersions();
+
+        return $paginated
+            ? $query->paginate($limit)->toArray()
+            : $query->get()->toArray();
     }
 }
