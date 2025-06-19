@@ -20,13 +20,14 @@ class QuoteService
             : $query->get()->toArray();
     }
 
-    public function show(Quote $quote): array
+    public function show(string $quoteId): array
     {
+        $quote = Quote::find($quoteId);
         if (! $quote) {
             throw new ApiNotFoundException(__('Quote not found'));
         }
 
-        return $quote->load('lineItems')->toArray();
+        return $quote->toArray();
     }
 
     public function analyze(array $request): array

@@ -25,9 +25,9 @@ class QuoteController extends Controller
         ))->asSuccessful();
     }
 
-    public function show(Quote $quote)
+    public function show(string $quoteId)
     {
-        $quote = $this->quoteService->show($quote);
+        $quote = $this->quoteService->show($quoteId);
 
         return (new ApiResponse(
             data: $quote,
