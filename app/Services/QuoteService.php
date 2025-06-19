@@ -13,7 +13,7 @@ class QuoteService
     {
         $paginated = $request->get('paginated', true);
         $limit = $request->get('limit', 10);
-        $query = Quote::with('lineItems');
+        $query = Quote::with('lineItems')->latest('id');
 
         return $paginated
             ? $query->paginate($limit)->toArray()
@@ -80,7 +80,7 @@ class QuoteService
     {
         $paginated = $request->get('paginated', true);
         $limit = $request->get('limit', 10);
-        $query = $quote->aiAnalysisVersions();
+        $query = $quote->aiAnalysisVersions()->latest('id');
 
         return $paginated
             ? $query->paginate($limit)->toArray()
