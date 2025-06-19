@@ -170,7 +170,8 @@ class Quote extends Model
         if (! empty($userFeedback['line_items'])) {
             $lineItemInstructions = "The user has made specific suggestions for individual quote items as follows:\n";
             foreach ($userFeedback['line_items'] as $item) {
-                $lineItemInstructions .= "- Line Item ID {$item['id']}: \"{$item['suggestion']}\"\n";
+                $itemSuggestion = $item['suggestion'] ?? null;
+                $lineItemInstructions .= "- Line Item ID {$item['id']}: \"{$itemSuggestion}\"\n";
             }
         }
 

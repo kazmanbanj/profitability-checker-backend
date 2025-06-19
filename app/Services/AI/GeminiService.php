@@ -21,6 +21,10 @@ class GeminiService
 
     public function generateContent(string $prompt): ?string
     {
+        if (!$this->baseUrl || !$this->apiKey) {
+            return null;
+        }
+
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
         ])->post("{$this->baseUrl}?key={$this->apiKey}", [
