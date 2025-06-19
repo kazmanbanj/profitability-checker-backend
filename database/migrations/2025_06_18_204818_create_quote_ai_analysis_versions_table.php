@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('line_items', function (Blueprint $table) {
+        Schema::create('quote_ai_analysis_versions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('quote_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->decimal('cost_price', 13, 2);
-            $table->decimal('sell_price', 13, 2);
-            $table->integer('quantity');
-            $table->json('additional_info')->nullable();
+            $table->foreignId('quote_id')
+                ->constrained()
+                ->onDelete('cascade');
+            $table->json('suggestions')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('line_items');
+        Schema::dropIfExists('quote_ai_analysis_versions');
     }
 };

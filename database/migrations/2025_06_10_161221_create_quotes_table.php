@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('quotes', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
             $table->decimal('labor_hours', 8, 2);
             $table->decimal('labor_cost_per_hour', 8, 2);
-            $table->decimal('fixed_overheads', 10, 2);
+            $table->decimal('fixed_overheads', 13, 2);
             $table->decimal('target_profit_margin', 5, 2);
+            $table->json('ai_profitability_suggestions')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
