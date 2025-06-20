@@ -12,7 +12,7 @@ class QuoteTest extends TestCase
     /**
      * A basic feature test example.
      */
-    public function test_can_analyze_quote(): void
+    public function test_user_can_analyze_quote(): void
     {
         $payload = [
             'line_items' => [

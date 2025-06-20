@@ -55,17 +55,17 @@ class Quote extends Model
         return $this->hasMany(QuoteAiAnalysisVersion::class);
     }
 
-    private function calculateTotalRevenue(): float
+    public function calculateTotalRevenue(): float
     {
         return $this->lineItems->sum(fn ($item) => $item->sell_price * $item->quantity);
     }
 
-    private function calculateTotalCost(): float
+    public function calculateTotalCost(): float
     {
         return $this->lineItems->sum(fn ($item) => $item->cost_price * $item->quantity);
     }
 
-    private function calculateLaborCost(): float
+    public function calculateLaborCost(): float
     {
         return $this->labor_hours * $this->labor_cost_per_hour;
     }
@@ -125,7 +125,7 @@ class Quote extends Model
         return $response ?: 'No suggestions available.';
     }
 
-    private function buildPrompt(array $profitabilityData): string
+    public function buildPrompt(array $profitabilityData): string
     {
         $profitabilityJson = json_encode($profitabilityData, JSON_PRETTY_PRINT);
 
