@@ -164,13 +164,19 @@ MYSQL_ROOT_PASSWORD=your_password
 docker-compose up -d --build
 ```
 
-### 4. Run Database Migrations
+### 4. Build and Start the Containers
+
+```bash
+docker compose run --rm composer install
+```
+
+### 5. Run Database Migrations
 
 ```bash
 docker compose exec php php artisan migrate
 ```
 
-### 5. Run other artisan commands (Optional)
+### 6. Run other artisan commands (Optional)
 
 ```bash
 docker compose exec php php artisan optimize:clear
