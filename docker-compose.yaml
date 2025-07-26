@@ -1,0 +1,48 @@
+services:
+  server:
+    # image: 'nginx:stable'  # Commented out because you’re building a custom image
+    build:
+      context: .                     # Project root
+      dockerfile: docker/dockerfiles/nginx.dockerfile
+    ports:
+      - '8000:80'                   # Expose port 80 on container to 8000 on host
+    volumes:
+      - .:/var/www/html         # Bind mount your source code
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro  # Config file, read-only
+    depends_on:
+      - php
+      - mysql
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/dockerfiles/php.dockerfile
+    volumes:
+      - .:/var/www/html:delegated  # `delegated` works on macOS for better performance
+
+  mysql:
+    image: 'mysql'
+    env_file:
+      - docker/env/mysql.env            # Environment variables for MySQL (good practice)
+
+  composer:
+    build:
+      context: docker/dockerfiles
+      dockerfile: composer.dockerfile
+    volumes:
+      - .:/var/www/html
+
+  artisan:
+    build:
+      context: .
+      dockerfile: docker/dockerfiles/php.dockerfile
+    volumes:
+      - .:/var/www/html
+    entrypoint: ["php", "/var/www/html/artisan"]  # Useful to run artisan commands
+
+  npm:
+    image: 'node:18'
+    working_dir: '/var/www/html'
+    entrypoint: ['npm']
+    volumes:
+      - .:/var/www/html

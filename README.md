@@ -105,3 +105,120 @@ project-root/
     Confirm your database credentials and that MySQL is running.
 
 ---
+
+
+### BONUS
+## 🐳 Setting up with Docker
+
+Follow the below steps if you want to run the application in a Dockerized development environment using **Docker Compose**.
+
+---
+
+## 🧱 Requirements
+
+- [Docker](https://www.docker.com/products/docker-desktop)
+- [Docker Compose](https://docs.docker.com/compose/)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository (Skip this step if you have it cloned already)
+
+```bash
+git clone https://github.com/kazmanbanj/profitability-checker-backend.git
+cd profitability-checker-backend
+cp .env.example .env
+cp /docker/env/mysql.env.example /docker/env/mysql.env
+```
+
+### 2. Configure Environment
+
+Edit your `.env` file with your database and Gemini API credentials:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=your_database_name
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+
+GEMINI_API_KEY="your_gemini_api_key"
+GEMINI_API_BASE_URL="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+GEMINI_ROLE="user"
+
+FRONTEND_URL=http://localhost:5173
+```
+
+Also, edit your `docker/env/mysql.env` file as well:
+
+```env
+MYSQL_DATABASE=your_database_name
+MYSQL_ROOT_PASSWORD=your_password
+```
+
+### 3. Build and Start the Containers
+
+```bash
+docker-compose up -d --build
+```
+
+### 4. Run Database Migrations
+
+```bash
+docker compose exec php php artisan migrate
+```
+
+### 5. Run other artisan commands (Optional)
+
+```bash
+docker compose exec php php artisan optimize:clear
+docker compose exec php php artisan db:seed
+docker compose exec php php artisan test
+```
+
+API will be available at: [http://localhost:8000](http://localhost:8000)
+
+---
+
+## 🐋 Common Docker Commands
+
+### Start containers
+```
+docker compose up -d
+```
+
+### Stop containers
+```
+docker compose down
+```
+
+### Rebuild containers
+```
+docker compose up -d --build
+```
+
+### Run artisan commands
+```
+docker compose exec php php artisan
+```
+
+### Run composer
+```
+docker compose run --rm composer -V
+docker compose run --rm composer install
+docker compose run --rm composer update
+```
+
+### Run composer
+```
+docker compose run --rm composer -V
+docker compose run --rm npm install
+docker compose run --rm npm update
+```
+
+### Enter container shell
+```
+docker compose exec php bash
+```

@@ -1,0 +1,47 @@
+# Node modules, vendor dependencies
+node_modules/
+vendor/
+
+# Laravel & PHP-specific
+.env
+.env.*        # avoid secrets in builds
+storage/
+bootstrap/cache/
+
+# Composer artifacts
+composer.lock
+composer.phar
+
+# Node artifacts
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Logs & temp files
+*.log
+*.tmp
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker files not needed in container
+.dockerignore
+docker-compose*
+docker/
+
+# IDE/editor config
+.vscode/
+.idea/
+*.code-workspace
+*.sublime*
+
+# OS-specific
+*.bak
+*.old
+*.orig
