@@ -3,14 +3,15 @@
 namespace Tests\Unit;
 
 use App\Models\Quote;
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ProfitabilityCalculationTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $quote;
+
     protected $lineItems;
 
     protected function setUp(): void
@@ -48,7 +49,7 @@ class ProfitabilityCalculationTest extends TestCase
                     'MPN' => fake()->name(),
                     'SKU' => fake()->name(),
                 ],
-            ]
+            ],
         ];
 
         $quote = Quote::create($payload);
@@ -64,7 +65,7 @@ class ProfitabilityCalculationTest extends TestCase
 
     public function test_quote_total_revenue_is_calculated_correctly()
     {
-        $expected = collect($this->lineItems)->sum(fn($item) => $item['sell_price'] * $item['quantity']);
+        $expected = collect($this->lineItems)->sum(fn ($item) => $item['sell_price'] * $item['quantity']);
         $actual = $this->quote->calculateTotalRevenue($this->quote, $this->lineItems);
         $this->assertEquals($expected, $actual);
         $this->assertEquals(70, $actual);
@@ -72,7 +73,7 @@ class ProfitabilityCalculationTest extends TestCase
 
     public function test_quote_total_cost_is_calculated_correctly()
     {
-        $expected = collect($this->lineItems)->sum(fn($item) => $item['cost_price'] * $item['quantity']);
+        $expected = collect($this->lineItems)->sum(fn ($item) => $item['cost_price'] * $item['quantity']);
         $actual = $this->quote->calculateTotalCost($this->quote, $this->lineItems);
         $this->assertEquals($expected, $actual);
         $this->assertEquals(40, $actual);

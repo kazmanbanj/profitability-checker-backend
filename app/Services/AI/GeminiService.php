@@ -21,7 +21,7 @@ class GeminiService
 
     public function generateContent(string $prompt): ?string
     {
-        if (!$this->baseUrl || !$this->apiKey) {
+        if (! $this->baseUrl || ! $this->apiKey) {
             return null;
         }
 

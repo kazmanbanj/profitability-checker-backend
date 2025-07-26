@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Models\Quote;
 use App\Helpers\ApiResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use App\Services\QuoteService;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AnalyzeQuoteRequest;
 use App\Http\Requests\ReAnalyzeQuoteRequest;
+use App\Models\Quote;
+use App\Services\QuoteService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class QuoteController extends Controller
 {
