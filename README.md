@@ -161,7 +161,7 @@ MYSQL_ROOT_PASSWORD=your_password
 ### 3. Build and Start the Containers
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ### 4. Build and Start the Containers
