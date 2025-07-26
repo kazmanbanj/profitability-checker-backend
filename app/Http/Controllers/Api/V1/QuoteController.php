@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Models\Quote;
 use App\Helpers\ApiResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use App\Services\QuoteService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AnalyzeQuoteRequest;
 use App\Http\Requests\ReAnalyzeQuoteRequest;
-use App\Models\Quote;
-use App\Services\QuoteService;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 
 class QuoteController extends Controller
 {
     public function __construct(protected QuoteService $quoteService) {}
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $response = $this->quoteService->list($request);
 
@@ -25,7 +27,7 @@ class QuoteController extends Controller
         ))->asSuccessful();
     }
 
-    public function show(string $quoteId)
+    public function show(string $quoteId): JsonResponse
     {
         $quote = $this->quoteService->show($quoteId);
 
@@ -35,7 +37,7 @@ class QuoteController extends Controller
         ))->asSuccessful();
     }
 
-    public function analyze(AnalyzeQuoteRequest $request)
+    public function analyze(AnalyzeQuoteRequest $request): JsonResponse
     {
         $response = $this->quoteService->analyze($request->validated());
 
@@ -45,7 +47,7 @@ class QuoteController extends Controller
         ))->asSuccessful();
     }
 
-    public function reAnalyze(Quote $quote, ReAnalyzeQuoteRequest $request)
+    public function reAnalyze(Quote $quote, ReAnalyzeQuoteRequest $request): JsonResponse
     {
         $response = $this->quoteService->reAnalyze($quote, $request->validated());
 
@@ -55,7 +57,7 @@ class QuoteController extends Controller
         ))->asSuccessful();
     }
 
-    public function versions(Quote $quote, Request $request)
+    public function versions(Quote $quote, Request $request): JsonResponse
     {
         $response = $this->quoteService->versions($quote, $request);
 
@@ -65,7 +67,7 @@ class QuoteController extends Controller
         ))->asSuccessful();
     }
 
-    public function exportAnalysis(Quote $quote)
+    public function exportAnalysis(Quote $quote): Response
     {
         $pdfTitle = 'Quote Analysis';
         $companyName = 'AV dealers'; // Assumed company name; should be user-defined.

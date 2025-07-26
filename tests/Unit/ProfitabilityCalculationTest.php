@@ -38,6 +38,16 @@ class ProfitabilityCalculationTest extends TestCase
                     'MPN' => fake()->name(),
                     'SKU' => fake()->name(),
                 ],
+            ],
+            [
+                'name' => fake()->name(),
+                'cost_price' => (float) 3,
+                'sell_price' => (float) 5,
+                'quantity' => (int) 10,
+                'additional_info' => [
+                    'MPN' => fake()->name(),
+                    'SKU' => fake()->name(),
+                ],
             ]
         ];
 
@@ -57,6 +67,7 @@ class ProfitabilityCalculationTest extends TestCase
         $expected = collect($this->lineItems)->sum(fn($item) => $item['sell_price'] * $item['quantity']);
         $actual = $this->quote->calculateTotalRevenue($this->quote, $this->lineItems);
         $this->assertEquals($expected, $actual);
+        $this->assertEquals(70, $actual);
     }
 
     public function test_quote_total_cost_is_calculated_correctly()
@@ -64,6 +75,7 @@ class ProfitabilityCalculationTest extends TestCase
         $expected = collect($this->lineItems)->sum(fn($item) => $item['cost_price'] * $item['quantity']);
         $actual = $this->quote->calculateTotalCost($this->quote, $this->lineItems);
         $this->assertEquals($expected, $actual);
+        $this->assertEquals(40, $actual);
     }
 
     public function test_quote_labor_cost_is_calculated_correctly()
@@ -71,6 +83,7 @@ class ProfitabilityCalculationTest extends TestCase
         $expected = $this->quote->labor_hours * $this->quote->labor_cost_per_hour;
         $actual = $this->quote->calculateLaborCost($this->quote, $this->lineItems);
         $this->assertEquals($expected, $actual);
+        $this->assertEquals(136, $actual);
     }
 
     public function test_quote_profitability_is_calculated_correctly()
