@@ -129,7 +129,7 @@ Follow the below steps if you want to run the application in a Dockerized develo
 git clone https://github.com/kazmanbanj/profitability-checker-backend.git
 cd profitability-checker-backend
 cp .env.example .env
-cp /docker/env/mysql.env.example /docker/env/mysql.env
+cp docker/env/mysql.env.example docker/env/mysql.env
 ```
 
 ### 2. Configure Environment
@@ -138,7 +138,7 @@ Edit your `.env` file with your database and Gemini API credentials:
 
 ```env
 DB_CONNECTION=mysql
-DB_HOST=mysql
+DB_HOST=mysql // make sure this is set to mysql
 DB_PORT=3306
 DB_DATABASE=your_database_name
 DB_USERNAME=your_username
