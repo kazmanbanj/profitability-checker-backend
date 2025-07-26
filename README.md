@@ -222,3 +222,10 @@ docker compose run --rm npm update
 ```
 docker compose exec php bash
 ```
+
+### Command to clear everything:
+#### 🚨 WARNING: This is destructive — all images, containers, and persistent data (e.g. databases) will be deleted.
+```
+docker compose down -v --remove-orphans
+docker system prune -a --volumes --force
+```
