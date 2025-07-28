@@ -179,6 +179,7 @@ docker compose exec php php artisan migrate
 ### 6. Run other artisan commands (Optional)
 
 ```bash
+docker compose exec php php artisan key:generate
 docker compose exec php php artisan optimize:clear
 docker compose exec php php artisan db:seed
 docker compose exec php php artisan test
