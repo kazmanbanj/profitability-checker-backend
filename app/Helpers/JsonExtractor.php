@@ -1,7 +1,10 @@
 <?php
 
-if (! function_exists('extractJsonArray')) {
-    function extractJsonArray(string $output): array
+namespace App\Helpers;
+
+class JsonExtractor
+{
+    public static function extract(string $output): array
     {
         $cleaned = preg_replace('/^```json\s*|\s*```$/', '', trim($output));
 
