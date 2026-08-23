@@ -8,7 +8,6 @@ WORKDIR /var/www/html
 
 # Install Composer dependencies
 RUN composer install \
-    --no-dev \
     --prefer-dist \
     --optimize-autoloader
 
