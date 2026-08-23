@@ -1,10 +1,8 @@
-# Node artifacts
 node_modules/
 npm-debug.log
 yarn-error.log
 pnpm-debug.log
 
-# Laravel cache & temp
 public/hot
 public/storage
 storage/*.key
@@ -12,21 +10,15 @@ storage/framework/cache/data/*
 storage/logs/*
 bootstrap/cache/*.php
 
-# Environment files
 .env
 .env.*
-
-# OS junk
 .DS_Store
 Thumbs.db
 
-# IDE/editor
 .vscode/
 .idea/
 *.code-workspace
-*.sublime*
 
-# Git
 .git
 .gitignore
 .gitattributes
