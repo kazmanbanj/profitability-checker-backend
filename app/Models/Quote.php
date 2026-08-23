@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\JsonExtractor;
 use App\Services\AI\GeminiService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -99,8 +100,8 @@ class Quote extends Model
         ];
 
         $aiGenerated = $reassess
-            ? extractJsonArray($this->getAIGeneratedProfitability($previousSuggestion, $userFeedback, $reassess))
-            : extractJsonArray($this->getAIGeneratedProfitability($profitability));
+            ? JsonExtractor::extract($this->getAIGeneratedProfitability($previousSuggestion, $userFeedback, $reassess))
+            : JsonExtractor::extract($this->getAIGeneratedProfitability($profitability));
         $resultMap = collect($aiGenerated['items'] ?? [])->keyBy('name');
         $profitability['line_items'] = collect($profitability['line_items'])->map(function ($item) use ($resultMap) {
             $aiItem = $resultMap->get($item['name'], []);
