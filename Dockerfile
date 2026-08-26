@@ -36,6 +36,8 @@ RUN docker-php-ext-install pdo pdo_pgsql mbstring xml
 
 WORKDIR /var/www/html
 
+# COPY .env.docker /var/www/html/.env    - for development, you can uncomment this line to copy the .env.docker file into the container as .env
+
 COPY --from=build_vendor /app /var/www/html
 
 RUN chown -R www-data:www-data storage bootstrap/cache
