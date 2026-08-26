@@ -22,3 +22,4 @@ Thumbs.db
 .git
 .gitignore
 .gitattributes
+!.env.docker
