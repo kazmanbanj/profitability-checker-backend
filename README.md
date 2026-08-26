@@ -354,4 +354,8 @@ docker compose exec php bash
 ```
 docker compose down -v --remove-orphans
 docker system prune -a --volumes --force
+
+docker build -t laravel-app .
+docker run -d --name laravel-app-container -p 8080:80 laravel-app
+docker start laravel-app-container
 ```
