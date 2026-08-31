@@ -1,0 +1,63 @@
+# Exported from Render on 2026-08-31T17:57:08Z
+version: "1"
+services:
+- type: web
+  name: profitoptimiser
+  runtime: docker
+  repo: https://github.com/kazmanbanj/profitability-checker-backend
+  plan: free
+  envVars:
+  - key: GEMINI_ROLE
+    sync: false
+  - key: GEMINI_API_BASE_URL
+    sync: false
+  - key: GEMINI_API_KEY
+    sync: false
+  - key: APP_DEBUG
+    sync: false
+  - key: SESSION_SECURE_COOKIE
+    sync: false
+  - key: SESSION_SAME_SITE
+    sync: false
+  - key: SESSION_HTTP_ONLY
+    sync: false
+  - key: SESSION_DRIVER
+    sync: false
+  - key: QUEUE_CONNECTION
+    sync: false
+  - key: LOG_LEVEL
+    sync: false
+  - key: LOG_CHANNEL
+    sync: false
+  - key: FRONTEND_URL
+    sync: false
+  - key: DB_USERNAME
+    sync: false
+  - key: DB_PORT
+    sync: false
+  - key: DB_PASSWORD
+    sync: false
+  - key: DB_HOST
+    sync: false
+  - key: DB_DATABASE
+    sync: false
+  - key: DB_CONNECTION
+    sync: false
+  - key: DATABASE_URL
+    sync: false
+  - key: CACHE_DRIVER
+    sync: false
+  - key: APP_URL
+    sync: false
+  - key: APP_MAINTENANCE_DRIVER
+    sync: false
+  - key: APP_LOCALE
+    sync: false
+  - key: APP_KEY
+    sync: false
+  - key: APP_ENV
+    sync: false
+  region: oregon
+  dockerContext: .
+  dockerfilePath: ./Dockerfile
+  autoDeployTrigger: commit
