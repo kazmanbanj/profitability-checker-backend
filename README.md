@@ -1,3 +1,5 @@
+https://profitoptimiser.onrender.com
+
 # 📊 Profit Optimiser
 
 This is the backend API for the Profit Optimiser project, built with **Laravel 12**. It calculates quote profitability, tracks quote versions, and integrates with the **Gemini AI API** to provide suggestions for margin improvement, labor allocation, and overall financial health.
