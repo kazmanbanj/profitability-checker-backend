@@ -10,109 +10,85 @@ class ProfitabilityCalculationTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $quote;
-
-    protected $lineItems;
+    protected Quote $quote;
 
     protected function setUp(): void
     {
         parent::setUp();
-        [$this->quote, $this->lineItems] = $this->createQuoteWithLineItems();
+
+        $this->quote = $this->createQuoteWithLineItems();
     }
 
-    protected function createQuoteWithLineItems(array $payload = [], array $lineItems = [])
+    /**
+     * Create a Quote with two known line items and eager-load the relation
+     * so the model's calculation methods can walk $this->lineItems.
+     * No AI call is made here — that belongs in a feature/integration test.
+     */
+    protected function createQuoteWithLineItems(array $quoteOverrides = [], array $lineItems = []): Quote
     {
-        $payload = array_merge([
-            'labor_hours' => 4,
-            'labor_cost_per_hour' => 34,
-            'fixed_overheads' => 10,
+        $quote = Quote::create(array_merge([
+            'labor_hours'          => 4,
+            'labor_cost_per_hour'  => 34,
+            'fixed_overheads'      => 10,
             'target_profit_margin' => 12,
-        ], $payload);
+        ], $quoteOverrides));
 
-        $lineItems = $lineItems ?: [
+        $quote->lineItems()->createMany($lineItems ?: [
             [
-                'name' => fake()->name(),
-                'cost_price' => (float) 2,
-                'sell_price' => (float) 4,
-                'quantity' => (int) 5,
-                'additional_info' => [
-                    'MPN' => fake()->name(),
-                    'SKU' => fake()->name(),
-                ],
+                'name'            => 'Widget A',
+                'cost_price'      => 2.0,
+                'sell_price'      => 4.0,
+                'quantity'        => 5,
+                'additional_info' => null,
             ],
             [
-                'name' => fake()->name(),
-                'cost_price' => (float) 3,
-                'sell_price' => (float) 5,
-                'quantity' => (int) 10,
-                'additional_info' => [
-                    'MPN' => fake()->name(),
-                    'SKU' => fake()->name(),
-                ],
+                'name'            => 'Widget B',
+                'cost_price'      => 3.0,
+                'sell_price'      => 5.0,
+                'quantity'        => 10,
+                'additional_info' => null,
             ],
-        ];
+        ]);
 
-        $quote = Quote::create($payload);
-        $quote->lineItems()->createMany($lineItems);
+        // Reload the relation so the in-memory model reflects the persisted items.
+        $quote->load('lineItems');
 
-        $suggestions = $quote->calculateProfitability();
-
-        $quote->aiAnalysisVersions()->create(['suggestions' => $suggestions]);
-        $quote->update(['ai_profitability_suggestions' => $suggestions]);
-
-        return [$quote, $lineItems];
+        return $quote;
     }
 
-    public function test_quote_total_revenue_is_calculated_correctly()
+    public function test_quote_total_revenue_is_calculated_correctly(): void
     {
-        $expected = collect($this->lineItems)->sum(fn ($item) => $item['sell_price'] * $item['quantity']);
-        $actual = $this->quote->calculateTotalRevenue($this->quote, $this->lineItems);
-        $this->assertEquals($expected, $actual);
-        $this->assertEquals(70, $actual);
+        // (4 × 5) + (5 × 10) = 20 + 50 = 70
+        $this->assertEquals(70.0, $this->quote->calculateTotalRevenue());
     }
 
-    public function test_quote_total_cost_is_calculated_correctly()
+    public function test_quote_total_cost_is_calculated_correctly(): void
     {
-        $expected = collect($this->lineItems)->sum(fn ($item) => $item['cost_price'] * $item['quantity']);
-        $actual = $this->quote->calculateTotalCost($this->quote, $this->lineItems);
-        $this->assertEquals($expected, $actual);
-        $this->assertEquals(40, $actual);
+        // (2 × 5) + (3 × 10) = 10 + 30 = 40
+        $this->assertEquals(40.0, $this->quote->calculateTotalCost());
     }
 
-    public function test_quote_labor_cost_is_calculated_correctly()
+    public function test_quote_labor_cost_is_calculated_correctly(): void
     {
-        $expected = $this->quote->labor_hours * $this->quote->labor_cost_per_hour;
-        $actual = $this->quote->calculateLaborCost($this->quote, $this->lineItems);
-        $this->assertEquals($expected, $actual);
-        $this->assertEquals(136, $actual);
+        // 4 hours × $34/hr = 136
+        $this->assertEquals(136.0, $this->quote->calculateLaborCost());
     }
 
-    public function test_quote_profitability_is_calculated_correctly()
+    public function test_quote_derived_profitability_figures_are_correct(): void
     {
-        $totalCost = $this->quote->calculateTotalCost($this->quote, $this->lineItems);
-        $laborCost = $this->quote->calculateLaborCost($this->quote, $this->lineItems);
-        $totalRevenue = $this->quote->calculateTotalRevenue($this->quote, $this->lineItems);
-        $costOfGoodsSold = $totalCost + $laborCost + $this->quote->fixed_overheads;
-        $grossProfit = $totalRevenue - $costOfGoodsSold;
-        $profitMargin = $totalRevenue > 0 ? ($grossProfit / $totalRevenue) * 100 : 0;
+        $totalRevenue    = $this->quote->calculateTotalRevenue();   // 70
+        $totalCost       = $this->quote->calculateTotalCost();      // 40
+        $laborCost       = $this->quote->calculateLaborCost();      // 136
+        $costOfGoodsSold = $totalCost + $laborCost + $this->quote->fixed_overheads; // 40 + 136 + 10 = 186
+        $grossProfit     = $totalRevenue - $costOfGoodsSold;        // 70 - 186 = -116
+        $profitMargin    = round(($grossProfit / $totalRevenue) * 100, 2); // -165.71
 
-        $expected = [
-            'labor_hours' => $this->quote->labor_hours,
-            'labor_cost_per_hour' => $this->quote->labor_cost_per_hour,
-            'fixed_overheads' => $this->quote->fixed_overheads,
-            'target_profit_margin' => $this->quote->target_profit_margin,
-            'total_cost' => $totalCost,
-            'cost_of_goods_sold' => $costOfGoodsSold,
-            'total_revenue' => $totalRevenue,
-            'labor_cost' => $laborCost,
-            'gross_profit' => $grossProfit,
-            'profit_margin' => round($profitMargin, 2),
-            'meets_target' => $profitMargin >= $this->quote->target_profit_margin,
-        ];
-        $actual = $this->quote->calculateProfitability($this->quote->toArray(), $this->lineItems);
-        foreach ($expected as $key => $value) {
-            $this->assertArrayHasKey($key, $actual);
-            $this->assertEquals($value, $actual[$key]);
-        }
+        $this->assertEquals(70.0,    $totalRevenue);
+        $this->assertEquals(40.0,    $totalCost);
+        $this->assertEquals(136.0,   $laborCost);
+        $this->assertEquals(186.0,   $costOfGoodsSold);
+        $this->assertEquals(-116.0,  $grossProfit);
+        $this->assertEquals(-165.71, $profitMargin);
+        $this->assertFalse($profitMargin >= $this->quote->target_profit_margin);
     }
 }

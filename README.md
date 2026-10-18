@@ -1,6 +1,6 @@
 # 📊 Specifi Profit Optimiser
 
-This is the backend API for the Specifi Profit Optimiser project, built with **Laravel 12**. It calculates quote profitability, tracks quote versions, and integrates with the **Gemini AI API** to provide suggestions for margin improvement, labor allocation, and overall financial health.
+This is the backend API for the Specifi Profit Optimiser project, built with **Laravel 12**. It calculates quote profitability, tracks quote versions, and integrates with the **Groq AI API** to provide suggestions for margin improvement, labor allocation, and overall financial health.
 
 ---
 
@@ -9,7 +9,7 @@ This is the backend API for the Specifi Profit Optimiser project, built with **L
 - **Framework:** Laravel 12
 - **Language:** PHP 8.1+
 - **Database:** MySQL
-- **AI Integration:** Google Gemini API
+- **AI Integration:** Groq API (GPT OSS 20B)
 - **PDF Export:** barryvdh/laravel-dompdf
 
 ---
@@ -28,7 +28,7 @@ php artisan key:generate
 
 ### 2. Configure Environment
 
-Edit your `.env` file with your database and Gemini API credentials:
+Edit your `.env` file with your database and Groq API credentials:
 
 ```env
 DB_CONNECTION=mysql
@@ -38,15 +38,14 @@ DB_DATABASE=your_database_name
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 
-GEMINI_API_KEY="your_gemini_api_key"
-GEMINI_API_BASE_URL="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
-GEMINI_ROLE="user"
+GROQ_API_KEY="your_groq_api_key"
+GROQ_MODEL="openai/gpt-oss-20b"
 
 FRONTEND_URL=http://localhost:5173
 ```
 
 > **Note:**
-> To obtain a Gemini API key, visit [Gemini API Docs](https://ai.google.dev/gemini-api/docs), sign in, and follow the instructions to create and copy your API key.
+> To obtain a Groq API key, visit [Groq Console](https://console.groq.com), sign in, go to **API Keys**, and create a new key.
 
 ### 3. Database Setup
 
@@ -99,7 +98,7 @@ project-root/
     Ensure `FRONTEND_URL` is set correctly in your `.env`.
 
 - **API Key Issues:**
-    Verify that `GEMINI_API_KEY` is valid and active.
+    Verify that `GROQ_API_KEY` is valid and active, and that `GROQ_MODEL` is set to a supported model (e.g. `openai/gpt-oss-20b`).
 
 - **Database Errors:**
     Confirm your database credentials and that MySQL is running.
@@ -134,7 +133,7 @@ cp docker/env/mysql.env.example docker/env/mysql.env
 
 ### 2. Configure Environment
 
-Edit your `.env` file with your database and Gemini API credentials:
+Edit your `.env` file with your database and Groq API credentials:
 
 ```env
 DB_CONNECTION=mysql
@@ -144,9 +143,8 @@ DB_DATABASE=your_database_name
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 
-GEMINI_API_KEY="your_gemini_api_key"
-GEMINI_API_BASE_URL="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
-GEMINI_ROLE="user"
+GROQ_API_KEY="your_groq_api_key"
+GROQ_MODEL="openai/gpt-oss-20b"
 
 FRONTEND_URL=http://localhost:5173
 ```
@@ -239,4 +237,39 @@ docker system prune -a --volumes --force
 docker build -t laravel-app .
 docker run -d --name laravel-app-container -p 8080:80 laravel-app
 docker start laravel-app-container
+```
+
+---
+
+## 🎯 Docker Build Targets
+
+The Dockerfile uses multi-stage builds with two targets:
+
+| Target | Description |
+|--------|-------------|
+| `dev`  | Copies `.env.docker` into the container as `.env`. Use for local development. |
+| `base` | No `.env` baked in. Use for production — supply env vars at runtime. |
+
+### Build for development
+
+```bash
+docker build --target dev -t laravel-app:dev .
+docker run -d --name laravel-app-container -p 8080:80 laravel-app:dev
+```
+
+### Build for production
+
+```bash
+docker build --target base -t laravel-app:prod .
+docker run -d --name laravel-app-container -p 80:80 --env-file .env.production laravel-app:prod
+```
+
+### Using Docker Compose
+
+Set the `target` in your `docker-compose.yml`:
+
+```yaml
+build:
+  context: .
+  target: dev   # change to base for production
 ```

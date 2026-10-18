@@ -17,20 +17,20 @@ class QuoteTest extends TestCase
         $payload = [
             'line_items' => [
                 [
-                    'name' => fake()->name(),
-                    'cost_price' => rand(10, 100),
-                    'sell_price' => rand(10, 100),
-                    'quantity' => rand(10, 100),
+                    'name'            => 'HDMI Cable 2m',
+                    'cost_price'      => 15.00,
+                    'sell_price'      => 30.00,
+                    'quantity'        => 5,
                     'additional_info' => [
-                        'MPN' => fake()->name(),
-                        'SKU' => fake()->name(),
+                        'MPN' => 'HDM-2M-001',
+                        'SKU' => 'SKU-00123',
                     ],
                 ],
             ],
-            'labor_hours' => rand(10, 100),
-            'labor_cost_per_hour' => rand(10, 100),
-            'fixed_overheads' => rand(10, 100),
-            'target_profit_margin' => rand(10, 50),
+            'labor_hours'          => 8,
+            'labor_cost_per_hour'  => 25.00,
+            'fixed_overheads'      => 50.00,
+            'target_profit_margin' => 20,
         ];
 
         $this->post('/api/v1/quotes/analyze', $payload)

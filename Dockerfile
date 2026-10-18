@@ -16,9 +16,9 @@ RUN composer install \
 
 
 # -----------------------------
-# Stage 2: PHP + NGINX + Laravel
+# Stage 2: Base (shared by all environments)
 # -----------------------------
-FROM php:8.2-fpm
+FROM php:8.2-fpm AS base
 
 RUN apt-get update && apt-get install -y \
     nginx \
@@ -36,9 +36,6 @@ RUN docker-php-ext-install pdo pdo_pgsql mbstring xml
 
 WORKDIR /var/www/html
 
-# - for development, you can uncomment this line to copy the .env.docker file into the container as .env
-# COPY .env.docker /var/www/html/.env
-
 COPY --from=build_vendor /app /var/www/html
 
 RUN chown -R www-data:www-data storage bootstrap/cache
@@ -53,3 +50,10 @@ EXPOSE 80
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/usr/bin/supervisord"]
+
+# -----------------------------
+# Stage 3: Development
+# -----------------------------
+FROM base AS dev
+
+COPY .env.docker /var/www/html/.env

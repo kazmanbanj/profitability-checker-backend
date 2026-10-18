@@ -2,13 +2,14 @@
 
 namespace App\Services;
 
-use App\Exceptions\ApiNotFoundException;
 use App\Models\Quote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class QuoteService
 {
+    public function __construct(protected QuoteAnalysisService $analysisService) {}
+
     public function list($request): array
     {
         $paginated = $request->get('paginated', true);
@@ -20,16 +21,6 @@ class QuoteService
             : $query->get()->toArray();
     }
 
-    public function show(string $quoteId): array
-    {
-        $quote = Quote::find($quoteId);
-        if (! $quote) {
-            throw new ApiNotFoundException(__('Quote not found'));
-        }
-
-        return $quote->toArray();
-    }
-
     public function analyze(array $request): array
     {
         return DB::transaction(function () use ($request) {
@@ -38,7 +29,7 @@ class QuoteService
             if (! empty($request['line_items']) && is_array($request['line_items'])) {
                 $quote->lineItems()->createMany($request['line_items']);
             }
-            $suggestions = $quote->calculateProfitability();
+            $suggestions = $this->analysisService->calculateProfitability($quote);
             $quote->aiAnalysisVersions()->create([
                 'suggestions' => $suggestions,
             ]);
@@ -59,7 +50,8 @@ class QuoteService
                 $currentSuggestions = json_decode($currentSuggestions, true);
             }
 
-            $suggestions = $quote->calculateProfitability(
+            $suggestions = $this->analysisService->calculateProfitability(
+                $quote,
                 (array) $currentSuggestions,
                 $request,
                 true
