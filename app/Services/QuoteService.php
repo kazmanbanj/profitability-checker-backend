@@ -12,7 +12,7 @@ class QuoteService
 
     public function list($request): array
     {
-        $paginated = $request->get('paginated', true);
+        $paginated = $request->boolean('paginated', true);
         $limit = $request->get('limit', 10);
         $query = Quote::with('lineItems')->latest('id');
 
@@ -70,7 +70,7 @@ class QuoteService
 
     public function versions(Quote $quote, Request $request): array
     {
-        $paginated = $request->get('paginated', true);
+        $paginated = $request->boolean('paginated', true);
         $limit = $request->get('limit', 10);
         $query = $quote->aiAnalysisVersions()->latest('id');
 
