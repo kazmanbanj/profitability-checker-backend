@@ -34,9 +34,8 @@ return [
         ],
     ],
 
-    'gemini' => [
-        'key' => env('GEMINI_API_KEY'),
-        'base_url' => env('GEMINI_API_BASE_URL'),
-        'role' => env('GEMINI_ROLE'),
+    'groq' => [
+        'key'   => env('GROQ_API_KEY'),
+        'model' => env('GROQ_MODEL', 'openai/gpt-oss-20b'),
     ],
 ];

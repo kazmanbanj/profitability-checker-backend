@@ -12,7 +12,6 @@ class ReAnalyzeQuoteRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'quote_id' => 'required|integer',
             'line_items' => 'nullable|array|min:1',
             'line_items.*.id' => 'required_with:line_items|integer',
             'line_items.*.suggestion' => 'nullable|string',

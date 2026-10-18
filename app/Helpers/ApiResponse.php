@@ -86,9 +86,11 @@ class ApiResponse
     {
         return response()->json([
             'success' => $statusCode <= 202,
-            'data' => $this->data,
+            'data'    => $this->data,
             'message' => $this->message,
-            'error' => $this->error,
+            'error'   => is_string($this->error) && $this->error !== ''
+                ? [$this->error]
+                : $this->error,
         ], $statusCode);
     }
 }

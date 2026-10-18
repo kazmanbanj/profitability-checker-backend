@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AnalyzeQuoteRequest;
 use App\Http\Requests\ReAnalyzeQuoteRequest;
 use App\Models\Quote;
+use App\Services\QuoteAnalysisService;
 use App\Services\QuoteService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +16,10 @@ use Illuminate\Http\Response;
 
 class QuoteController extends Controller
 {
-    public function __construct(protected QuoteService $quoteService) {}
+    public function __construct(
+        protected QuoteService $quoteService,
+        protected QuoteAnalysisService $analysisService,
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -27,12 +31,10 @@ class QuoteController extends Controller
         ))->asSuccessful();
     }
 
-    public function show(string $quoteId): JsonResponse
+    public function show(Quote $quote): JsonResponse
     {
-        $quote = $this->quoteService->show($quoteId);
-
         return (new ApiResponse(
-            data: $quote,
+            data: $quote->toArray(),
             message: __('Quote retrieved successfully')
         ))->asSuccessful();
     }
@@ -69,9 +71,9 @@ class QuoteController extends Controller
 
     public function exportAnalysis(Quote $quote): Response
     {
-        $pdfTitle = 'Quote Analysis';
-        $companyName = 'AV dealers'; // Assumed company name; should be user-defined.
-        $analysis = $quote->ai_profitability_suggestions ?? $quote->calculateProfitability();
+        $pdfTitle    = 'Quote Analysis';
+        $companyName = config('business.company_name');
+        $analysis = $quote->ai_profitability_suggestions ?? $this->analysisService->calculateProfitability($quote);
         $pdf = PDF::loadView('pdf-exports.quote-summary', compact('pdfTitle', 'companyName', 'analysis'));
 
         return $pdf->download('quote-analysis.pdf');
